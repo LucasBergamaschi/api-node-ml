@@ -1686,3 +1686,9 @@
 [2025-02-25T20:03:29.094Z] Tabela tokens_ml pronta.
 [2025-02-25T20:03:29.106Z] Tabela vendas_ml pronta.
 [2025-02-25T20:03:29.361Z] Banco fechado com sucesso.
+[2025-02-26T01:24:01.811Z] [ERROR] (node:8376) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[2025-02-26T01:24:01.817Z] Servidor rodando na porta 3001 - http://localhost:3001
+[2025-02-26T01:28:25.266Z] [ERROR] (node:2188) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[2025-02-26T01:28:25.277Z] Servidor rodando na porta 3001 - http://localhost:3001

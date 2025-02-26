@@ -5,6 +5,7 @@ const fetch = require('node-fetch');
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 
+
 const logStream = fs.createWriteStream('logs.txt', { flags: 'a' });
 console.log = (...args) => {
     const logMessage = `[${new Date().toISOString()}] ${args.join(' ')}\n`;
