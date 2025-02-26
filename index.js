@@ -124,3 +124,10 @@ app.get('/getVendas', async (req, res) => {
         res.status(500).send("Erro ao buscar vendas.");
     }
 });
+
+// Definir a porta correta para rodar no Railway ou localmente
+const PORT = process.env.PORT || 8080;
+
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor rodando na porta ${PORT} - http://localhost:${PORT}`);
+});
