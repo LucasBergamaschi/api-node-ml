@@ -4,6 +4,8 @@ const path = require('path');
 const fetch = require('node-fetch');
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
+const db = require('./database'); // Importa a conexão com o SQLite
+
 
 
 const logStream = fs.createWriteStream('logs.txt', { flags: 'a' });
