@@ -2,85 +2,31 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const fetch = require('node-fetch');
-const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const db = require('./database'); // Importa a conexão com o SQLite
-
-
+require('dotenv').config();
 
 const logStream = fs.createWriteStream('logs.txt', { flags: 'a' });
+
 console.log = (...args) => {
     const logMessage = `[${new Date().toISOString()}] ${args.join(' ')}\n`;
     process.stdout.write(logMessage);
     logStream.write(logMessage);
 };
+
 console.error = (...args) => {
     const errorMessage = `[${new Date().toISOString()}] [ERROR] ${args.join(' ')}\n`;
     process.stderr.write(errorMessage);
     logStream.write(errorMessage);
 };
 
+// Configurar o diretório de arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
-
-function iniciarConexaoDb() {
-    return new Promise((resolve, reject) => {
-        const db = new sqlite3.Database('banco_dados_ml.db', (err) => {
-            if (err) {
-                console.error('Erro ao abrir banco de dados:', err.message);
-                return reject(err);
-            } 
-            console.log('Banco de dados conectado.');
-
-            db.serialize(() => {
-                db.run(`CREATE TABLE IF NOT EXISTS tokens_ml (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    access_token TEXT,
-                    refresh_token TEXT,
-                    expires_at INTEGER
-                )`, (err) => {
-                    if (err) console.error('Erro ao criar tabela tokens_ml:', err.message);
-                    else console.log('Tabela tokens_ml pronta.');
-                });
-
-                db.run(`CREATE TABLE IF NOT EXISTS vendas_ml (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    data_venda TEXT,
-                    id_venda INTEGER,
-                    valor_total REAL,
-                    taxa_ml REAL,
-                    custo_frete REAL,
-                    valor_liquido REAL,
-                    produto_nome TEXT,
-                    status_pedido TEXT,
-                    status_entrega TEXT,
-                    quantidade INTEGER
-                )`, (err) => {
-                    if (err) console.error('Erro ao criar tabela vendas_ml:', err.message);
-                    else console.log('Tabela vendas_ml pronta.');
-                });
-
-                resolve(db);
-            });
-        });
-    });
-}
-
-
-function fecharConexaoDb(db) {
-    if (db) {
-        db.close((err) => {
-            if (err) console.error('Erro ao fechar banco:', err.message);
-            else console.log('Banco fechado com sucesso.');
-        });
-    }
-}
 
 async function getAuth() {
     console.log("🔄 Atualizando token...");
     const app_id = "7068339412785747";
     const client_secret = "O7DsBVaA851Tf1WBZC8byQdlpaUbVu3x";
-
-    const db = await iniciarConexaoDb(); // Aguarda a conexão antes de continuar
 
     try {
         const resultado = await new Promise((resolve, reject) => {
@@ -103,6 +49,7 @@ async function getAuth() {
             headers: { "accept": "application/json", "content-type": "application/x-www-form-urlencoded" },
             body: `grant_type=refresh_token&client_id=${app_id}&client_secret=${client_secret}&refresh_token=${refresh_token_antigo}`
         });
+
         const resposta_json = await resposta.json();
 
         if (resposta_json.error) {
@@ -122,11 +69,8 @@ async function getAuth() {
         return resposta_json.access_token;
     } catch (err) {
         console.error("❌ Erro ao obter token:", err.message);
-    } finally {
-        fecharConexaoDb(db);
     }
 }
-
 
 async function getVendas(access_token) {
     const seller_id = "530696397";
@@ -140,8 +84,6 @@ async function salvarVendas(dados) {
         console.error("Erro: 'dados.results' não é um array válido!", dados);
         return;
     }
-    
-    const db = await iniciarConexaoDb(); // Aguarda a conexão com o banco
 
     for (let venda of dados.results) {
         const data_venda = venda.date_closed;
@@ -166,10 +108,7 @@ async function salvarVendas(dados) {
             );
         });
     }
-
-    fecharConexaoDb(db);
 }
-
 
 app.get('/getVendas', async (req, res) => {
     try {
@@ -177,8 +116,7 @@ app.get('/getVendas', async (req, res) => {
         if (!access_token) return res.status(500).send("Erro ao obter token.");
 
         const resultadoVendas = await getVendas(access_token);
-        
-        await salvarVendas(resultadoVendas); // Aguarda salvar antes de continuar
+        await salvarVendas(resultadoVendas);
 
         res.send("Vendas recuperadas e salvas com sucesso!");
     } catch (error) {
@@ -189,5 +127,5 @@ app.get('/getVendas', async (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT} - http://localhost:${PORT}`);
+    console.log(`🚀 Servidor rodando na porta ${PORT} - http://localhost:${PORT}`);
 });
