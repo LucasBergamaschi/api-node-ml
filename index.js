@@ -118,14 +118,9 @@ app.get('/getVendas', async (req, res) => {
         const resultadoVendas = await getVendas(access_token);
         await salvarVendas(resultadoVendas);
 
-        res.send("Vendas recuperadas e salvas com sucesso!");
+        res.json({ message: "Vendas recuperadas e salvas com sucesso!", vendas: resultadoVendas });
     } catch (error) {
         console.error("Erro ao buscar vendas:", error.message);
         res.status(500).send("Erro ao buscar vendas.");
     }
-});
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT} - http://localhost:${PORT}`);
 });
